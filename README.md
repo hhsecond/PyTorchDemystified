@@ -1,5 +1,5 @@
 # PyTorchDemystified
-Why did I switch to PyTorch
+#### Why did I switch to PyTorch
 
 Repo contains the material I use in [Anthill Inside 2017](https://anthillinside.talkfunnel.com/2017/)
 - Benchmarking different DL frameworks for performance, efficiency and easiness
