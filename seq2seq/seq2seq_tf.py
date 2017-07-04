@@ -3,7 +3,7 @@ from tensorflow.python.layers.core import Dense
 import numpy as np
 import pickle
 
-from data import get_data
+from util import get_data, get_accuracy
 
 en, fr = get_data()
 
@@ -163,20 +163,44 @@ def seq2seq_model(input_data, target_data, keep_prob, batch_size,
     return training_decoder_output, inference_decoder_output
 
 
-# Number of Epochs
+def pad_sentence_batch(sentence_batch, pad_int):
+    """Pad sentences with <PAD> so that each sentence of a batch has the same length"""
+    max_sentence = max([len(sentence) for sentence in sentence_batch])
+    return [sentence + [pad_int] * (max_sentence - len(sentence)) for sentence in sentence_batch]
+
+
+def get_batches(sources, targets, batch_size, source_pad_int, target_pad_int):
+    """Batch targets, sources, and the lengths of their sentences together"""
+    for batch_i in range(0, len(sources) // batch_size):
+        start_i = batch_i * batch_size
+
+        # Slice the right amount for the batch
+        sources_batch = sources[start_i:start_i + batch_size]
+        targets_batch = targets[start_i:start_i + batch_size]
+
+        # Pad
+        pad_sources_batch = np.array(pad_sentence_batch(sources_batch, source_pad_int))
+        pad_targets_batch = np.array(pad_sentence_batch(targets_batch, target_pad_int))
+
+        # Need the lengths for the _lengths parameters
+        pad_targets_lengths = []
+        for target in pad_targets_batch:
+            pad_targets_lengths.append(len(target))
+
+        pad_source_lengths = []
+        for source in pad_sources_batch:
+            pad_source_lengths.append(len(source))
+
+        yield pad_sources_batch, pad_targets_batch, pad_source_lengths, pad_targets_lengths
+
+
 epochs = 8
-# Batch Size
 batch_size = 128
-# RNN Size
 rnn_size = 256
-# Number of Layers
 num_layers = 2
-# Embedding Size
 encoding_embedding_size = 128
 decoding_embedding_size = 128
-# Learning Rate
 learning_rate = 0.001
-# Dropout Keep Probability
 keep_probability = 0.5
 display_step = 100
 
@@ -231,56 +255,6 @@ with train_graph.as_default():
         train_op = optimizer.apply_gradients(capped_gradients)
 
 
-def pad_sentence_batch(sentence_batch, pad_int):
-    """Pad sentences with <PAD> so that each sentence of a batch has the same length"""
-    max_sentence = max([len(sentence) for sentence in sentence_batch])
-    return [sentence + [pad_int] * (max_sentence - len(sentence)) for sentence in sentence_batch]
-
-
-def get_batches(sources, targets, batch_size, source_pad_int, target_pad_int):
-    """Batch targets, sources, and the lengths of their sentences together"""
-    for batch_i in range(0, len(sources) // batch_size):
-        start_i = batch_i * batch_size
-
-        # Slice the right amount for the batch
-        sources_batch = sources[start_i:start_i + batch_size]
-        targets_batch = targets[start_i:start_i + batch_size]
-
-        # Pad
-        pad_sources_batch = np.array(pad_sentence_batch(sources_batch, source_pad_int))
-        pad_targets_batch = np.array(pad_sentence_batch(targets_batch, target_pad_int))
-
-        # Need the lengths for the _lengths parameters
-        pad_targets_lengths = []
-        for target in pad_targets_batch:
-            pad_targets_lengths.append(len(target))
-
-        pad_source_lengths = []
-        for source in pad_sources_batch:
-            pad_source_lengths.append(len(source))
-
-        yield pad_sources_batch, pad_targets_batch, pad_source_lengths, pad_targets_lengths
-
-
-def get_accuracy(target, logits):
-    """
-    Calculate accuracy
-    """
-    max_seq = max(target.shape[1], logits.shape[1])
-    if max_seq - target.shape[1]:
-        target = np.pad(
-            target,
-            [(0, 0), (0, max_seq - target.shape[1])],
-            'constant')
-    if max_seq - logits.shape[1]:
-        logits = np.pad(
-            logits,
-            [(0, 0), (0, max_seq - logits.shape[1])],
-            'constant')
-
-    return np.mean(np.equal(target, logits))
-
-
 # Split data to training and validation sets
 train_source = en.text_as_ids[batch_size:]
 train_target = fr.text_as_ids[batch_size:]
@@ -301,6 +275,7 @@ with tf.Session(graph=train_graph) as sess:
                 get_batches(train_source, train_target, batch_size,
                             en.vocab2id['<PAD>'],
                             fr.vocab2id['<PAD>'])):
+            print(source_batch.shape)
 
             _, loss = sess.run(
                 [train_op, cost],

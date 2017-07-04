@@ -1,6 +1,7 @@
 import os
 from collections import namedtuple
 import pickle
+import numpy as np
 
 data = namedtuple('data', 'id2vocab vocab2id, text, text_as_ids')
 
@@ -63,3 +64,22 @@ def get_data():
             (en_vocab2id, fr_vocab2id),
             (en_id2vocab, fr_id2vocab)), out_file)
     return en, fr
+
+
+def get_accuracy(target, logits):
+    """
+    Calculate accuracy
+    """
+    max_seq = max(target.shape[1], logits.shape[1])
+    if max_seq - target.shape[1]:
+        target = np.pad(
+            target,
+            [(0, 0), (0, max_seq - target.shape[1])],
+            'constant')
+    if max_seq - logits.shape[1]:
+        logits = np.pad(
+            logits,
+            [(0, 0), (0, max_seq - logits.shape[1])],
+            'constant')
+
+    return np.mean(np.equal(target, logits))
