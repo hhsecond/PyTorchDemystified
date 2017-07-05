@@ -166,7 +166,8 @@ def seq2seq_model(input_data, target_data, keep_prob, batch_size,
 def pad_sentence_batch(sentence_batch, pad_int):
     """Pad sentences with <PAD> so that each sentence of a batch has the same length"""
     max_sentence = max([len(sentence) for sentence in sentence_batch])
-    return [sentence + [pad_int] * (max_sentence - len(sentence)) for sentence in sentence_batch]
+    temp = [sentence + [pad_int] * (max_sentence - len(sentence)) for sentence in sentence_batch]
+    return temp
 
 
 def get_batches(sources, targets, batch_size, source_pad_int, target_pad_int):
@@ -275,7 +276,6 @@ with tf.Session(graph=train_graph) as sess:
                 get_batches(train_source, train_target, batch_size,
                             en.vocab2id['<PAD>'],
                             fr.vocab2id['<PAD>'])):
-            print(source_batch.shape)
 
             _, loss = sess.run(
                 [train_op, cost],
