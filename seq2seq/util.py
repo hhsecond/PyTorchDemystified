@@ -3,7 +3,7 @@ from collections import namedtuple
 import pickle
 import numpy as np
 
-data = namedtuple('data', 'id2vocab vocab2id, text, text_as_ids')
+data = namedtuple('data', 'id2vocab vocab2id text text_as_ids')
 
 
 def load_data(path):
@@ -30,8 +30,8 @@ def whole_text_ids(text, word2id):
 
 
 def get_data():
-    en_text_path = 'small_vocab_en'
-    fr_text_path = 'small_vocab_fr'
+    en_text_path = 'data/small_vocab_en'
+    fr_text_path = 'data/small_vocab_fr'
 
     en_text = load_data(en_text_path).lower().split('\n')
     fr_text = load_data(fr_text_path).lower().split('\n')
