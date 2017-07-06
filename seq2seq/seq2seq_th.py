@@ -234,7 +234,6 @@ def train(
     encoder_outputs = encoder_outputs.cuda() if use_cuda else encoder_outputs
 
     loss = 0
-
     for ei in range(input_length):
         encoder_output, encoder_hidden = encoder(
             input_variable[ei], encoder_hidden)
@@ -277,6 +276,7 @@ def train(
 
     return loss.data[0] / target_length
 
+
 def asMinutes(s):
     m = math.floor(s / 60)
     s -= m * 60
@@ -301,8 +301,6 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
     training_pairs = [variablesFromPair(random.choice(pairs))
                       for i in range(n_iters)]
-    print(type(training_pairs[0]))
-    exit()
     criterion = nn.NLLLoss()
 
     for iter in range(1, n_iters + 1):
