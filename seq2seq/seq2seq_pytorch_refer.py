@@ -133,6 +133,7 @@ class EncoderRNN(nn.Module):
     def forward(self, input, hidden):
         embedded = self.embedding(input).view(1, 1, -1)
         output = embedded
+        # question: where is dropout
         output, hidden = self.gru(output, hidden)
         return output, hidden
 
@@ -157,6 +158,7 @@ class DecoderRNN(nn.Module):
 
     def forward(self, input, hidden):
         output = self.embedding(input).view(1, 1, -1)
+        # question: if multiple layer, how to pass hidden state of uppper layers
         for i in range(self.n_layers):
             output = F.relu(output)
             output, hidden = self.gru(output, hidden)
@@ -259,6 +261,8 @@ def train(
     loss = 0
 
     for ei in range(input_length):
+        print(encoder_hidden)
+        exit()
         encoder_output, encoder_hidden = encoder(
             input_variable[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0][0]
