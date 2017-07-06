@@ -68,7 +68,9 @@ class DecoderNetwork(nn.Module):
         return outputs, hidden
 
 
-encoder = EncoderNetowrk(100, 256, 300)
-decoder = DecoderNetwork(100, 256, 300)
+encoder = EncoderNetowrk(len(en.id2vocab), 256, 300)
+decoder = DecoderNetwork(len(fr.id2vocab), 256, 300)
+encoder_optim = optim.SGD(encoder.parameters(), lr=0.001)
+decoder_optim = optim.SGD(decoder.parameters(), lr=0.001)
 output, hidden = encoder(Variable(torch.LongTensor([[1]])), Variable(torch.zeros(1, 1, 256)))
 dec_output, dec_hidden = decoder(Variable(torch.LongTensor([[1]])), hidden)
