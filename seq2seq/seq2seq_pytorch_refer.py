@@ -157,6 +157,7 @@ class DecoderRNN(nn.Module):
         self.softmax = nn.LogSoftmax()
 
     def forward(self, input, hidden):
+        # question: why changing the dimension
         output = self.embedding(input).view(1, 1, -1)
         # question: if multiple layer, how to pass hidden state of uppper layers
         for i in range(self.n_layers):
@@ -204,6 +205,9 @@ class AttnDecoderRNN(nn.Module):
         for i in range(self.n_layers):
             output = F.relu(output)
             output, hidden = self.gru(output, hidden)
+            print(output.size())
+        print(output[0].size())
+        exit()
 
         output = F.log_softmax(self.out(output[0]))
         return output, hidden, attn_weights
@@ -261,8 +265,6 @@ def train(
     loss = 0
 
     for ei in range(input_length):
-        print(encoder_hidden)
-        exit()
         encoder_output, encoder_hidden = encoder(
             input_variable[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0][0]
