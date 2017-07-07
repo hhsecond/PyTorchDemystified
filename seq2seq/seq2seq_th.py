@@ -4,7 +4,7 @@ from torch.autograd import Variable
 from torch import optim
 import random
 
-from util import get_data, get_accuracy
+from util import get_data
 
 
 """
@@ -18,11 +18,12 @@ en, fr = get_data()
 
 use_cuda = torch.cuda.is_available()
 epochs = 30
-hidden_size = 256
+hidden_size = 512
 embedding_size = 300
 num_layers = 1
-lr = 0.001
+lr = 0.0001
 sent_len = len(en.text_as_ids)
+n_iter = 10000
 
 
 class EncoderNetowrk(nn.Module):
@@ -90,8 +91,9 @@ decoder = DecoderNetwork(len(fr.id2vocab), hidden_size, embedding_size).cuda()
 encoder_optim = optim.SGD(encoder.parameters(), lr=lr)
 decoder_optim = optim.SGD(decoder.parameters(), lr=lr)
 criterion = nn.NLLLoss()
+loss2plot = []
 for epoch in range(epochs):
-    for enc_inputs, dec_inputs, dec_outputs in get_batches(100):
+    for enc_inputs, dec_inputs, dec_outputs in get_batches(n_iter):
         encoder_optim.zero_grad()
         decoder_optim.zero_grad()
         loss = 0
@@ -103,12 +105,37 @@ for epoch in range(epochs):
             var = Variable(torch.LongTensor([[dec_inputs[i]]])).cuda()
             output, hidden_state = decoder(var, hidden_state)
             loss += criterion(output[0], Variable(torch.LongTensor([dec_outputs[i]])).cuda())
+        loss2plot.append(loss.data[0])
         loss.backward()
         encoder_optim.step()
         decoder_optim.step()
-    print(loss.data[0])
+        # loss2plot has total iterations
+        if len(loss2plot) % 50 == 0:
+            print(
+                'Epoch: {}, Iteration: {}, Loss: {}'.format(
+                    epoch, len(loss2plot) % n_iter, loss.data[0]))
 
 # Inference
+enc_inputs, dec_inputs, dec_outputs = get_batches(n_iter).__next__()
+hidden_state = Variable(torch.zeros(1, 1, hidden_size)).cuda()
+for val in enc_inputs:
+    var = Variable(torch.LongTensor([[val]])).cuda()
+    output, hidden_state = encoder(var, hidden_state)
+output = Variable(torch.LongTensor([[fr.vocab2id['<GO>']]])).cuda()
+prediction = []
+while True:
+    output, hidden_state = decoder(output, hidden_state)
+    value, index = output.topk(1)
+    pred = index.data[0][0]
+    if pred == fr.vocab2id['<EOS>'] or len(prediction) == 20:
+        break
+    else:
+        prediction.append(pred)
+        output = Variable(torch.LongTensor([[pred]])).cuda()
+predicted_lang = ' '.join([fr.id2vocab[val] for val in prediction])
+print(predicted_lang)
 
 # Let's say we need to print the Loss function and see whats happening
 # Just as you thought, you can do it
+# loss getting converted from int to Variable
+# Comparision op with variable and int
