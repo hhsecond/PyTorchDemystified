@@ -205,9 +205,6 @@ class AttnDecoderRNN(nn.Module):
         for i in range(self.n_layers):
             output = F.relu(output)
             output, hidden = self.gru(output, hidden)
-            print(output.size())
-        print(output[0].size())
-        exit()
 
         output = F.log_softmax(self.out(output[0]))
         return output, hidden, attn_weights
@@ -227,7 +224,8 @@ def indexesFromSentence(lang, sentence):
 def variableFromSentence(lang, sentence):
     indexes = indexesFromSentence(lang, sentence)
     indexes.append(EOS_token)
-    result = Variable(torch.LongTensor(indexes).view(-1, 1))
+    result = Variable(torch.LongTensor(indexes))
+    result = result.view(-1, 1)
     if use_cuda:
         return result.cuda()
     else:
