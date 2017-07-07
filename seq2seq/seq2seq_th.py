@@ -1,8 +1,11 @@
+import random
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch import optim
-import random
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 from util import get_data
 
@@ -84,6 +87,15 @@ def get_batches(n_iter):
         yield enc_inputs, dec_inputs, dec_outputs
 
 
+def showPlot(points):
+    plt.figure()
+    fig, ax = plt.subplots()
+    # this locator puts ticks at regular intervals
+    loc = ticker.MultipleLocator(base=0.2)
+    ax.yaxis.set_major_locator(loc)
+    plt.plot(points)
+
+
 encoder = EncoderNetowrk(len(en.id2vocab), hidden_size, embedding_size).cuda()
 decoder = DecoderNetwork(len(fr.id2vocab), hidden_size, embedding_size).cuda()
 
@@ -112,8 +124,9 @@ for epoch in range(epochs):
         # loss2plot has total iterations
         if len(loss2plot) % 50 == 0:
             print(
-                'Epoch: {}, Iteration: {}, Loss: {}'.format(
-                    epoch, len(loss2plot) % n_iter, loss.data[0]))
+                'Epoch: {}, Iteration: {}, Loss: {}, min_loss: {}'.format(
+                    epoch, len(loss2plot) % n_iter, loss.data[0], min(loss2plot)))
+    showPlot(loss2plot)
 
 # Inference
 enc_inputs, dec_inputs, dec_outputs = get_batches(n_iter).__next__()
