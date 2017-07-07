@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch import optim
-import torch.nn.functional as F
+import random
 
 from util import get_data, get_accuracy
 
@@ -17,6 +17,12 @@ get_data returns objects with
 en, fr = get_data()
 
 use_cuda = torch.cuda.is_available()
+epochs = 30
+hidden_size = 256
+embedding_size = 300
+num_layers = 1
+lr = 0.001
+sent_len = len(en.text_as_ids)
 
 
 class EncoderNetowrk(nn.Module):
@@ -68,9 +74,41 @@ class DecoderNetwork(nn.Module):
         return outputs, hidden
 
 
-encoder = EncoderNetowrk(len(en.id2vocab), 256, 300)
-decoder = DecoderNetwork(len(fr.id2vocab), 256, 300)
-encoder_optim = optim.SGD(encoder.parameters(), lr=0.001)
-decoder_optim = optim.SGD(decoder.parameters(), lr=0.001)
-output, hidden = encoder(Variable(torch.LongTensor([[1]])), Variable(torch.zeros(1, 1, 256)))
-dec_output, dec_hidden = decoder(Variable(torch.LongTensor([[1]])), hidden)
+def get_batches(n_iter):
+    for _ in range(n_iter):
+        i = random.randint(0, sent_len - 1)
+        enc_inputs = en.text_as_ids[i]
+        dec_inputs = [fr.vocab2id['<GO>']] + fr.text_as_ids[i]
+        dec_outputs = fr.text_as_ids[i] + [fr.vocab2id['<EOS>']]
+        yield enc_inputs, dec_inputs, dec_outputs
+
+
+encoder = EncoderNetowrk(len(en.id2vocab), hidden_size, embedding_size).cuda()
+decoder = DecoderNetwork(len(fr.id2vocab), hidden_size, embedding_size).cuda()
+
+# Training
+encoder_optim = optim.SGD(encoder.parameters(), lr=lr)
+decoder_optim = optim.SGD(decoder.parameters(), lr=lr)
+criterion = nn.NLLLoss()
+for epoch in range(epochs):
+    for enc_inputs, dec_inputs, dec_outputs in get_batches(100):
+        encoder_optim.zero_grad()
+        decoder_optim.zero_grad()
+        loss = 0
+        hidden_state = Variable(torch.zeros(1, 1, hidden_size)).cuda()
+        for val in enc_inputs:
+            var = Variable(torch.LongTensor([[val]])).cuda()
+            output, hidden_state = encoder(var, hidden_state)
+        for i in range(len(dec_inputs)):
+            var = Variable(torch.LongTensor([[dec_inputs[i]]])).cuda()
+            output, hidden_state = decoder(var, hidden_state)
+            loss += criterion(output[0], Variable(torch.LongTensor([dec_outputs[i]])).cuda())
+        loss.backward()
+        encoder_optim.step()
+        decoder_optim.step()
+    print(loss.data[0])
+
+# Inference
+
+# Let's say we need to print the Loss function and see whats happening
+# Just as you thought, you can do it
