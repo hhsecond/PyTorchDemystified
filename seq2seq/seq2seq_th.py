@@ -26,7 +26,7 @@ embedding_size = 300
 num_layers = 1
 lr = 0.0001
 sent_len = len(en.text_as_ids)
-n_iter = 10000
+n_iter = 500
 
 
 class EncoderNetowrk(nn.Module):
@@ -126,7 +126,7 @@ for epoch in range(epochs):
             print(
                 'Epoch: {}, Iteration: {}, Loss: {}, min_loss: {}'.format(
                     epoch, len(loss2plot) % n_iter, loss.data[0], min(loss2plot)))
-    showPlot(loss2plot)
+    # showPlot(loss2plot)
 
 # Inference
 enc_inputs, dec_inputs, dec_outputs = get_batches(n_iter).__next__()
@@ -145,8 +145,10 @@ while True:
     else:
         prediction.append(pred)
         output = Variable(torch.LongTensor([[pred]])).cuda()
-predicted_lang = ' '.join([fr.id2vocab[val] for val in prediction])
-print(predicted_lang)
+predicted_sent = ' '.join([fr.id2vocab[val] for val in prediction])
+original_sent = ' '.join([en.id2vocab[val] for val in enc_inputs])
+print(original_sent)
+print(predicted_sent)
 
 # Let's say we need to print the Loss function and see whats happening
 # Just as you thought, you can do it
