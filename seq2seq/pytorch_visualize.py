@@ -93,7 +93,7 @@ def remove_vis_hooks():
     Function.__call__ = old_function__call__
 
 
-def save_visualization(name, format='svg'):
+def save_visualization(name, format='jpg'):
     g = graphviz.Digraph(format=format)
     def sizestr(var):
         size = [int(i) for i in list(var.size())]

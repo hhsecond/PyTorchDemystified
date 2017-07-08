@@ -102,8 +102,6 @@ decoder_optim = optim.SGD(decoder.parameters(), lr=lr)
 criterion = nn.NLLLoss()
 loss2plot = []
 
-# Visualization
-# register_vis_hooks(encoder)
 
 for epoch in range(epochs):
     for enc_inputs, dec_inputs, dec_outputs in get_batches(n_iter):
@@ -118,9 +116,6 @@ for epoch in range(epochs):
             var = Variable(torch.LongTensor([[dec_inputs[i]]])).cuda()
             output, hidden_state = decoder(var, hidden_state)
             loss += criterion(output[0], Variable(torch.LongTensor([dec_outputs[i]])).cuda())
-        # remove_vis_hooks()
-        # save_visualization('seq2seq')
-        exit()
         loss2plot.append(loss.data[0])
         loss.backward()
         encoder_optim.step()
