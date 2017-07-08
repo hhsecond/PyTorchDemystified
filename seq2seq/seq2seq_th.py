@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 from util import get_data
+from pytorch_visualize import register_vis_hooks, remove_vis_hooks, save_visualization
 
 
 """
@@ -41,12 +42,10 @@ class EncoderNetowrk(nn.Module):
     def __init__(self, vocab_size, hidden_size, embedding_size, num_layers=1):
         super().__init__()
         self.embed = nn.Embedding(vocab_size, embedding_size)
-        # TODO - add dropout
         self.gru = nn.GRU(embedding_size, hidden_size, num_layers)
 
     def forward(self, inputs, hidden):
         embedded = self.embed(inputs)
-        # TODO - check why both inputs to gru should be 3 dimensional
         outputs, hidden = self.gru(embedded, hidden)
         return outputs, hidden
 
@@ -63,17 +62,13 @@ class DecoderNetwork(nn.Module):
     def __init__(self, vocab_size, hidden_size, embedding_size, num_layers=1):
         super().__init__()
         self.embed = nn.Embedding(vocab_size, embedding_size)
-        # TODO - add dropout
         self.gru = nn.GRU(embedding_size, hidden_size, num_layers)
         self.fc = nn.Linear(hidden_size, vocab_size)
-        # TODO - checkout all the functions that has been used
         self.softmax = nn.LogSoftmax()
 
     def forward(self, inputs, hidden):
         embedded = self.embed(inputs)
-        # TODO - check why both inputs to gru should be 3 dimensional
         outputs, hidden = self.gru(embedded, hidden)
-        # TODO - check why 2 dimension not 3
         outputs = self.softmax(self.fc(outputs[0]))
         return outputs, hidden
 
@@ -99,11 +94,17 @@ def showPlot(points):
 encoder = EncoderNetowrk(len(en.id2vocab), hidden_size, embedding_size).cuda()
 decoder = DecoderNetwork(len(fr.id2vocab), hidden_size, embedding_size).cuda()
 
+print(decoder)
+
 # Training
 encoder_optim = optim.SGD(encoder.parameters(), lr=lr)
 decoder_optim = optim.SGD(decoder.parameters(), lr=lr)
 criterion = nn.NLLLoss()
 loss2plot = []
+
+# Visualization
+# register_vis_hooks(encoder)
+
 for epoch in range(epochs):
     for enc_inputs, dec_inputs, dec_outputs in get_batches(n_iter):
         encoder_optim.zero_grad()
@@ -117,6 +118,9 @@ for epoch in range(epochs):
             var = Variable(torch.LongTensor([[dec_inputs[i]]])).cuda()
             output, hidden_state = decoder(var, hidden_state)
             loss += criterion(output[0], Variable(torch.LongTensor([dec_outputs[i]])).cuda())
+        # remove_vis_hooks()
+        # save_visualization('seq2seq')
+        exit()
         loss2plot.append(loss.data[0])
         loss.backward()
         encoder_optim.step()
