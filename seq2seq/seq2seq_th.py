@@ -24,7 +24,7 @@ epochs = 30
 hidden_size = 512
 embedding_size = 300
 num_layers = 1
-lr = 0.0001
+lr = 0.001
 sent_len = len(en.text_as_ids)
 n_iter = 500
 
