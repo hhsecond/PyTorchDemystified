@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 from util import get_data
-from pytorch_visualize import register_vis_hooks, remove_vis_hooks, save_visualization
 
 
 """
