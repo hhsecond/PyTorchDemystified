@@ -6,8 +6,13 @@ from torch.autograd import Variable
 from torch import optim
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import numpy as np
 
 from util import get_data
+from tflogger import TFLogger
+
+
+train_tf_logger = TFLogger('train')
 
 
 """
@@ -104,6 +109,7 @@ loss2plot = []
 
 for epoch in range(epochs):
     for enc_inputs, dec_inputs, dec_outputs in get_batches(n_iter):
+        accuracy = []
         encoder_optim.zero_grad()
         decoder_optim.zero_grad()
         loss = 0
@@ -114,8 +120,14 @@ for epoch in range(epochs):
         for i in range(len(dec_inputs)):
             var = Variable(torch.LongTensor([[dec_inputs[i]]])).cuda()
             output, hidden_state = decoder(var, hidden_state)
+            value, index = output.topk(1)
+            pred = index.data[0][0]
+            accuracy.append(pred == dec_outputs[i])
             loss += criterion(output[0], Variable(torch.LongTensor([dec_outputs[i]])).cuda())
-        loss2plot.append(loss.data[0])
+        outaccu = np.mean(accuracy)
+        loss2plot.append(loss.data[0] / len(dec_inputs))
+        outloss = np.mean(loss2plot)
+        train_tf_logger(step=len(loss2plot), accuracy=outaccu, loss=outloss)
         loss.backward()
         encoder_optim.step()
         decoder_optim.step()
@@ -123,7 +135,7 @@ for epoch in range(epochs):
         if len(loss2plot) % 50 == 0:
             print(
                 'Epoch: {}, Iteration: {}, Loss: {}, min_loss: {}'.format(
-                    epoch, len(loss2plot) % n_iter, loss.data[0], min(loss2plot)))
+                    epoch, len(loss2plot) % n_iter, loss.data[0] / len(dec_inputs), min(loss2plot)))
     # showPlot(loss2plot)
 
 # Inference
