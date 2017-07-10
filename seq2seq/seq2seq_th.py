@@ -9,10 +9,6 @@ import matplotlib.ticker as ticker
 import numpy as np
 
 from util import get_data
-from tflogger import TFLogger
-
-
-train_tf_logger = TFLogger('train')
 
 
 """
@@ -127,7 +123,8 @@ for epoch in range(epochs):
         outaccu = np.mean(accuracy)
         loss2plot.append(loss.data[0] / len(dec_inputs))
         outloss = np.mean(loss2plot)
-        train_tf_logger(step=len(loss2plot), accuracy=outaccu, loss=outloss)
+        # TensorBoard integration, Import the TF logger file first
+        # train_tf_logger.log(step=len(loss2plot), accuracy=outaccu, loss=outloss)
         loss.backward()
         encoder_optim.step()
         decoder_optim.step()
