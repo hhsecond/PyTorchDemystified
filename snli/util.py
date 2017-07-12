@@ -1,6 +1,7 @@
 import os
 from argparse import ArgumentParser
 
+
 def get_args():
     parser = ArgumentParser(description='PyTorch/torchtext SNLI example')
     parser.add_argument('--epochs', type=int, default=50)
