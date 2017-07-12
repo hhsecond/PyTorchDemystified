@@ -4,6 +4,7 @@ from torch.autograd import Variable
 
 from spinn import SPINN
 
+
 class Bottle(nn.Module):
 
     def forward(self, input):
@@ -49,7 +50,8 @@ class Encoder(nn.Module):
         state_shape = self.config.n_cells, batch_size, self.config.d_hidden
         h0 = c0 = Variable(inputs.data.new(*state_shape).zero_())
         outputs, (ht, ct) = self.rnn(inputs, (h0, c0))
-        return ht[-1] if not self.config.birnn else ht[-2:].transpose(0, 1).contiguous().view(batch_size, -1)
+        return ht[-1] if not self.config.birnn else ht[-2:].transpose(
+            0, 1).contiguous().view(batch_size, -1)
 
 
 class SNLIClassifier(nn.Module):
@@ -97,5 +99,5 @@ class SNLIClassifier(nn.Module):
         premise = self.encoder(prem_embed, prem_trans)
         hypothesis = self.encoder(hypo_embed, hypo_trans)
         scores = self.out(self.feature(premise, hypothesis))
-        #print(premise[0][:5], hypothesis[0][:5])
+        # print(premise[0][:5], hypothesis[0][:5])
         return scores

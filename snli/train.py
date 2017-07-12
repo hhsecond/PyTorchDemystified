@@ -99,7 +99,7 @@ for epoch in range(args.epochs):
                 iterations / len(train_iter) / args.lr_decay_every))
         iterations += 1 
         answer = model(batch)
-        #print(nn.functional.softmax(answer[0]).data.tolist(), batch.label.data[0])
+        # print(nn.functional.softmax(answer[0]).data.tolist(), batch.label.data[0])
         n_correct += (torch.max(answer, 1)[1].view(batch.label.size()).data == batch.label.data).sum()
         n_total += batch.batch_size
         train_acc = 100. * n_correct/n_total

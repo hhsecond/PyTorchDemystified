@@ -1,6 +1,7 @@
 import os
 from argparse import ArgumentParser
 
+
 def get_args():
     parser = ArgumentParser(description='PyTorch/torchtext SNLI example')
     parser.add_argument('--epochs', type=int, default=50)
@@ -30,7 +31,8 @@ def get_args():
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--save_path', type=str, default='results')
     parser.add_argument('--data_cache', type=str, default=os.path.join(os.getcwd(), '.data_cache'))
-    parser.add_argument('--vector_cache', type=str, default=os.path.join(os.getcwd(), '.vector_cache/input_vectors.pt'))
+    parser.add_argument('--vector_cache', type=str,
+                        default=os.path.join(os.getcwd(), '.vector_cache/input_vectors.pt'))
     parser.add_argument('--word_vectors', type=str, default='glove.42B')
     parser.add_argument('--resume_snapshot', type=str, default='')
     args = parser.parse_args()
