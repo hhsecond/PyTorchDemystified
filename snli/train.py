@@ -104,7 +104,9 @@ for epoch in range(args.epochs):
         n_total += batch.batch_size
         train_acc = 100. * n_correct/n_total
         loss = criterion(answer, batch.label)
-        loss.backward(); opt.step(); train_loss += loss.data[0] * batch.batch_size
+        loss.backward()
+        opt.step()
+        train_loss += loss.data[0] * batch.batch_size
         if iterations % args.save_every == 0:
             snapshot_prefix = os.path.join(args.save_path, 'snapshot')
             snapshot_path = snapshot_prefix + '_acc_{:.4f}_loss_{:.6f}_iter_{}_model.pt'.format(train_acc, train_loss / n_total, iterations)
