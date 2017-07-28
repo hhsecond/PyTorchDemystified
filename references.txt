@@ -1,0 +1,8 @@
+https://github.com/pytorch/examples
+https://medium.com/intuitionmachine/pytorch-dynamic-computational-graphs-and-modular-deep-learning-7e7f89f18d1
+https://medium.com/intuitionmachine/the-end-of-monolithic-deep-learning-86937c86bc1f
+https://medium.com/@devnag/generative-adversarial-networks-gans-in-50-lines-of-code-pytorch-e81b79659e3f
+https://hackernoon.com/how-is-pytorch-different-from-tensorflow-2c90f44747d6
+https://github.com/hhsecond/100neuralnetworks
+Benchmark: https://arxiv.org/pdf/1608.07249.pdf
+https://www.reddit.com/r/MachineLearning/comments/664ufi/n_facebook_releases_new_deep_learning_framework/
